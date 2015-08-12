@@ -1,5 +1,5 @@
 from math import log
-
+import operator
 def calcShannonEnt (dataSet):
 	numEntries = len(dataSet)
 	labelCounts = {}
@@ -46,3 +46,36 @@ def  chooseBestFeatureToSplit(dataSet):
 			bestInfoGain = infoGain
 			bestFeature = i;
 	return bestFeature
+
+def majorityCnt(classList):
+	classCount = {}
+	for vote in classList:
+		if vote not in classCount.keys():
+			classCount[vote] = 0
+		classCount[vote] +=1
+	sortedClassCount = sorted(classCount.iteritems(), key = operator.itemgetter(1), reverse = True)
+	return sortedClassCount[0][0]
+
+def createTree(dataSet, labels):
+	classList = [example[-1] for example in dataSet]
+	if classList.count(classList[0]) == len(classList):
+		return classList[0]
+	if len(dataSet[0] ) ==1:
+		return majorityCnt(classList)
+	bestFeature = chooseBestFeatureToSplit(dataSet)
+	bestFeatureLabels = labels[bestFeature]
+	myTree = {bestFeatLabel:{}}
+	del(labels[bestFeature])
+	featValues = [example[bestFeat] for example in dataSet]
+	uniqueVals = set(featValues)
+	for value in uniqueVals:
+		subLabels = labels[:]
+		myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeature, value), subLabels)
+	return myTree
+	
+		
+
+
+
+			
+		
