@@ -63,16 +63,55 @@ def createTree(dataSet, labels):
 	if len(dataSet[0] ) ==1:
 		return majorityCnt(classList)
 	bestFeature = chooseBestFeatureToSplit(dataSet)
-	bestFeatureLabels = labels[bestFeature]
+	bestFeatLabel = labels[bestFeature]
+	print('bestFeature %d, bestLabels %s'  %(bestFeature,bestFeatLabel))
 	myTree = {bestFeatLabel:{}}
 	del(labels[bestFeature])
-	featValues = [example[bestFeat] for example in dataSet]
+	featValues = [example[bestFeature] for example in dataSet]
 	uniqueVals = set(featValues)
 	for value in uniqueVals:
 		subLabels = labels[:]
 		myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeature, value), subLabels)
 	return myTree
-	
+
+def classify(inputTree, featLabels, testVec):
+	firstStr = inputTree.keys()[0]
+	secondDict = inputTree[firstStr]
+	featIndex = featLabels.index(firstStr)
+	for key in secondDict.keys():
+		if testVec[featIndex] == key:
+			if type(secondDict[key]).__name__=='dict':
+				classLabel = classify(secondDict[key], featLabels,testVec)
+			else:
+				classLabel = secondDict[key]
+	return classLabel
+				pass
+
+		
+		
+
+
+
+def storeTree(inputTree, fileName):
+	import pickle
+	fw = open(fileName,'w')
+	pickle.dump(inputTree, fw)
+	fw.close()
+
+def getTree(fileName):
+	import pickle
+	fr = open(fileName)
+	return pickle.load(fr)
+
+
+
+
+
+
+
+
+
+
 		
 
 
