@@ -2,7 +2,7 @@
 # authot: duanmh
 # 2015-08-13 22:46
 
-from Numpy import *
+from numpy import *
 
 # train dataset  and  labels
 def loadDataSet():
@@ -16,18 +16,45 @@ def loadDataSet():
  	return postingList,classVec
 
 # get unique vocabulary  list in dataset
- def creatVocabList(dataSet):
+def creatVocabList(dataSet):
  	vocabList = set([])
  	for document in dataSet:
  		vocabList = vocabList | set(document)
  	return list(vocabList)
 
 # transform document to vector
- def setOfWord2Vec(vocabList, inputSet):
+def setOfWord2Vec(vocabList, inputSet):
  	returnVect = [0] * len(vocabList)
  	for word in inputSet:
  		if word in vocabList:
- 			returnVect.index(word) = 1
+ 			returnVect[vocabList.index(word)] = 1
  		else:
  			print ("the word: %s is not in my vocabulary" %word)
  	return returnVect
+
+def loadTrainSet():
+	dataSet, labels = loadDataSet();
+	vocabList = creatVocabList(dataSet)
+	trainMatrix = []
+	for document in dataSet:
+		trainMatrix.append(setOfWord2Vec(vocabList, document))
+	return trainMatrix, labels
+
+def trainNB0(trainMatrix, trainCatary):
+	numTrainDocs = len(trainMatrix)
+	numWords = len(trainMatrix[0])
+	pAbusive = sum(trainCatary)/ float(numTrainDocs)
+	p0Num = zeros(numWords)
+	p1Num = zeros(numWords)
+	p0Denom = 0.0; p1Denom = 0.0
+	
+	for i in range(numTrainDocs):
+		if trainCatary[i] == 1:
+			p1Num += trainMatrix[i]
+			p1Denom += sum(trainMatrix[i])
+		else:
+			p0Num += trainMatrix[i]
+			p0Denom += sum(trainMatrix[i])
+	p1Vect = p1Num / p1Denom
+	p0Vect = p0Num /p0Denom
+	return p0Vect, p1Vect, pAbusive
