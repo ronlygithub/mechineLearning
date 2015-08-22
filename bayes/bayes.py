@@ -32,7 +32,7 @@ def setOfWord2Vec(vocabList, inputSet):
  			print ("the word: %s is not in my vocabulary" %word)
  	return returnVect
 
-def loadTrainSet():
+def loadTrainingSet():
 	dataSet, labels = loadDataSet();
 	vocabList = creatVocabList(dataSet)
 	trainMatrix = []
@@ -58,3 +58,80 @@ def trainNB0(trainMatrix, trainCatary):
 	p1Vect = log(p1Num / p1Denom)
 	p0Vect = log(p0Num /p0Denom)
 	return p0Vect, p1Vect, pAbusive
+
+def classifyNB(vec2Clissify, p0Vec, p1Vec, pClass1):
+	p1 = sum(vec2Clissify * p1Vec) + log(pClass1)
+	p0 = sum(vec2Clissify * p0Vec) + log(1-pClass1)
+
+	if p1 > p0:
+		return p0,p1,1
+	else:
+		return p0,p1,0
+
+def testingNB():
+	listPosts, listClasses = loadDataSet()
+	myVocabList = creatVocabList(listPosts)
+	trainMat = []
+	for postsinDoc  in listPosts:
+		trainMat.append(setOfWord2Vec(myVocabList, postsinDoc))
+	p0v , p1v, pAb = trainNB0(array(trainMat), array(listClasses))
+	testEntry = ['love', 'my', 'dalmation']
+	thisDoc = array(setOfWord2Vec(myVocabList,testEntry))
+	print(testEntry, 'classified as:' , classifyNB(thisDoc,p0v,p1v,pAb))
+	testEntry = ['stupid', 'garbage']
+	thisDoc = array(setOfWord2Vec(myVocabList,testEntry))
+	print(testEntry, 'classified as:' , classifyNB(thisDoc,p0v,p1v,pAb))
+
+# transform document to vector bag of word model 
+def bagOfWord2Vec(vocabList, inputSet):
+ 	returnVect = [0] * len(vocabList)
+ 	for word in inputSet:
+ 		if word in vocabList:
+ 			returnVect[vocabList.index(word)]+=1
+ 		else:
+ 			print ("the word: %s is not in my vocabulary" %word)
+ 	return returnVect
+
+# regrex parse and splite text 
+def textParse(bigString):
+ 	import re
+ 	listOfTokens = re.split(r'\W*', bigString)
+ 	return [token.lower() for token in listOfTokens if(len(token)) >2]
+
+
+def spamTest():
+	docList = []; classList = []; fullText = [];
+	for i in xrange(1,10):
+		wordList = textParse(open('./email/spam/%d.txt' % i).read())		
+		docList.append(wordList)
+		fullText.extend(wordList)
+		classList.append(1)
+		wordList = textParse(open('./email/ham/%d.txt'  % i).read())
+		docList.append(wordList)
+		fullText.extend(wordList)
+		classList.append(0)
+	vocabList = creatVocabList(docList)
+	trainingSet = range(50); testSet = []
+	for i in range(10):
+		randIndex= int(random.uniform(0, len(trainingSet)))
+		testSet.append(trainingSet[randIndex])
+		del(trainingSet[randIndex])
+	trainMat = []; trianClass = []
+	for docIndex in trainingSet:
+		trainMat.append(bagOfWord2Vec(vocabList, docList))
+		trianClass.append(classList[docIndex])
+	p0, p1, pab = trainNB0(array(trainMat), array(trainClass))
+	errorCount =0
+	
+	for docIndex in testSet:
+		wordVec = bagOfWord2Vec(vocabList, docList)
+		if classifyNB(wordVec,p0,p1,pab) != classList[docIndex]:
+			errorCount+=1
+	print('the error rate is: ', float(errorCount)/len(testSet))
+
+
+
+
+
+	
+
