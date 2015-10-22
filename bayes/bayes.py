@@ -126,8 +126,10 @@ def spamTest():
 	for docIndex in testSet:
 		wordVec = bagOfWord2Vec(vocabList, docList)
 		if classifyNB(wordVec,p0,p1,pab) != classList[docIndex]:
+	
 			errorCount+=1
 	print('the error rate is: ', float(errorCount)/len(testSet))
+
 
 
 
